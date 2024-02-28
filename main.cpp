@@ -12,10 +12,10 @@ int randomSize = 10;
 std::vector<std::vector<int>> matrixA;
 std::vector<std::vector<int>> matrixB;
 
-std::vector<std::vector<int>> matrixResult1;
-std::vector<std::vector<int>> matrixResult2;
+std::vector<std::vector<int>> matrixResult1(countCols);
+std::vector<std::vector<int>> matrixResult2(countCols);
 
-std::vector<std::thread> thread_pool;
+std::vector<std::thread> thread_pool(countCols);
 
 void initMatrix()
 {
@@ -32,31 +32,9 @@ void initMatrix()
 		matrixA.push_back(randomVectorA);
 		matrixB.push_back(randomVectorB);
 	}
-	
-	/*std::cout << "Matrix A:" << std::endl;
-	for (size_t i = 0; i < countRows; ++i)
-	{
-		for (size_t j = 0; j < countCols; ++j)
-		{
-			std::cout << matrixA[i][j] << " ";
-		}
-		std::cout << std::endl;
-	}
-	std::cout << std::endl;
-
-	std::cout << "Matrix B:" << std::endl;
-	for (size_t i = 0; i < countRows; ++i)
-	{
-		for (size_t j = 0; j < countCols; ++j)
-		{
-			std::cout << matrixB[i][j] << " ";
-		}
-		std::cout << std::endl;
-	}
-	std::cout << std::endl;*/
 }
 
-void multMatrix(std::vector<int> row_, std::vector<std::vector<int>>& matrixRes_)
+void multMatrix(std::vector<int> row_, std::vector<std::vector<int>>& matrixRes_, int index_)
 {
 	std::vector<int> multedRow(countCols, 0);
 	for (size_t i = 0; i < countRows; ++i)
@@ -68,14 +46,14 @@ void multMatrix(std::vector<int> row_, std::vector<std::vector<int>>& matrixRes_
 		}
 		multedRow[i] = sum;
 	}
-	matrixRes_.push_back(multedRow);
+	matrixRes_[index_] = multedRow;
 }
 
 void multWithoutThreads()
 {
 	for (size_t i = 0; i < countRows; ++i)
 	{
-		multMatrix(matrixA[i], matrixResult1);
+		multMatrix(matrixA[i], matrixResult1, i);
 	}
 }
 
@@ -97,9 +75,14 @@ void multInThreads()
 {
 	for (size_t i = 0; i < countRows; ++i)
 	{
-		thread_pool.push_back(std::thread(multMatrix, matrixA[i], std::ref(matrixResult2)));
+		thread_pool[i] = (std::thread(multMatrix, matrixA[i], std::ref(matrixResult2), i));
+	}	
+
+	for (size_t i = 0; i < countRows; ++i)
+	{
 		thread_pool[i].join();
 	}
+
 }
 
 int main()
@@ -107,15 +90,15 @@ int main()
 	initMatrix();
 	
 	time_t timeStart = time(NULL);
-	multWithoutThreads();
+	//multWithoutThreads();
 	time_t timeEnd = time(NULL);
-	std::cout << "Running time the 'multWithoutThreads' func is " << timeEnd - timeStart << " seconds" << std::endl;
-	//printMatrixResult();
+	std::cout << "Running time the 'multWithoutThreads' func is " << double(timeEnd - timeStart) << " seconds" << std::endl;
+	//printMatrix(matrixResult1, std::string("Matrix Result 1: "));
 
 	timeStart = time(NULL);
 	multInThreads();
 	timeEnd = time(NULL);
-	std::cout << "Running time the 'multInThreads' func is " << timeEnd - timeStart << " seconds" << std::endl;
-	//printMatrixResult();
+	std::cout << "Running time the 'multInThreads' func is " << double(timeEnd - timeStart) << " seconds" << std::endl;
+	//printMatrix(matrixResult2, std::string("Matrix Result 2: "));
 
 }
