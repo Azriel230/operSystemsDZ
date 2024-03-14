@@ -1,7 +1,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
+#include <fcntl.h>
+
 
 int main()
 {
@@ -10,23 +13,17 @@ int main()
 	int pid = fork();
 	if (pid == 0)
 	{
-		printf("I am a child %d\n", getpid());
-		sleep(10);
-		printf("end sleep %d\n", getpid());
-		return(42);
+		int fd = open("f1.txt", O_RDWR | O_CREAT);
+		dup2(fd, 1);
+		close(fd);
+		execl("myprint", "myprint", NULL);
+		printf("this will only happen if exec fails\n");
 	}
 	else
 	{
-		sleep(20);
-		printf("I am %d. My child is called %d\n", getpid(), pid);
-		int res;
-		wait(&res);
-		if (WIFEXITED(res))
-			printf("My child has trrminated %d\n", WEXITSTATUS(res));
-		printf("and again %d sleep \n", getpid());
-		sleep(10);
+		wait(NULL);
+		printf("we're done\n");
 	}
-	printf("Finish %d\n", getpid());
 	return 0;
 }
 
@@ -180,3 +177,133 @@ int main()
 	// 		printf("My child has trrminated %d\n", WEXITSTATUS(res));
 	// }
 	// printf("Finish %d\n", getpid());
+
+	//Example 4		int pid = fork();
+	// if (pid == 0)
+	// {
+	// 	printf("I am a child %d\n", getpid());
+	// 	sleep(10);
+	// 	printf("end sleep %d\n", getpid());
+	// 	return(42);
+	// }
+	// else
+	// {
+	// 	sleep(20);
+	// 	printf("I am %d. My child is called %d\n", getpid(), pid);
+	// 	int res;
+	// 	wait(&res);
+	// 	if (WIFEXITED(res))
+	// 		printf("My child has trrminated %d\n", WEXITSTATUS(res));
+	// 	printf("and again %d sleep \n", getpid());
+	// 	sleep(10);
+	// }
+	// printf("Finish %d\n", getpid());
+
+	//Example 5
+	// int pid;
+	// int x = 123;
+	// pid = fork();
+	// if (pid == 0)
+	// {
+	// 	printf("child: x is %d\n", x);
+	// 	x = 42;
+	// 	sleep(1);
+	// 	printf("child: x is %d\n", x);
+	// }
+	// else
+	// {
+	// 	printf("parent: x is %d\n", x);
+	// 	x = 13;
+	// 	sleep(1);
+	// 	printf("parent: x is %d\n", x);
+	// 	wait(NULL);
+	// }
+
+	//Example 6
+	//	int pid;
+	// int x = 123;
+	// pid = fork();
+	// if (pid == 0)
+	// {
+	// 	printf("child: x is %d and address is 0x%p\n", x, &x);
+	// 	x = 42;
+	// 	sleep(1);
+	// 	printf("child: x is %d and address is 0x%p\n", x, &x);
+	// }
+	// else
+	// {
+	// 	printf("parent: x is %d and address is 0x%p\n", x, &x);
+	// 	x = 13;
+	// 	sleep(1);
+	// 	printf("parent: x is %d and address is 0x%p\n", x, &x);
+	// 	wait(NULL);
+	// }
+
+	//Example 7
+	// int pid;
+	// int x = 123;
+	// pid = fork();
+	// if (pid == 0)
+	// {
+	// 	printf("I'm a child %d with parent %d\n", getpid(), getppid());
+	// }
+	// else
+	// {
+	// 	printf("I'm a parent %d with parent %d\n", getpid(), getppid());
+	// 	wait(NULL);
+	// }
+
+	//Example 8
+	// int pid = fork();
+	// if (pid == 0)
+	// {
+	// 	int child = getpid();
+	// 	printf("I'm a child %d in group %d\n", child, getpgid(child));
+	// }
+	// else
+	// {
+	// 	int parent = getpid();
+	// 	printf("I'm a parent %d in group %d\n", parent, getpgid(parent));
+	// 	wait(NULL);
+	// }
+
+	//Example 9
+	// int pid = fork();
+	// if (pid == 0)
+	// {
+	// 	int child = getpid();
+	// 	printf("Child (%d): parent %d, group %d\n", getpid(), getppid(), getpgid(child));
+	// 	sleep(8);
+	// 	printf("Child (%d): parent %d, group %d\n", getpid(), getppid(), getpgid(child));
+	// 	sleep(4);
+	// }
+	// else
+	// {
+	// 	int parent = getpid();
+	// 	printf("Parent (%d): parent %d, group %d\n", getpid(), getppid(), getpgid(parent));
+	// 	sleep(4);
+	// 	int zero = 0;
+	// 	int u = 5 / zero;
+	// }
+
+	// Example 10
+	// pid_t pid, ppid;
+	// int a = 0;
+	// (void)fork();
+	// a = a+1;
+	// pid = getpid();
+	// ppid = getppid();
+	// printf("My pid = %d, my ppid = %d, result = %d\n", (int)pid, (int)ppid, a);
+
+	//Example 11
+	// int pid = fork();
+	// if (pid == 0)
+	// {
+	// 	int child = getpid();
+	// 	printf("Child (%d): session %d\n", getpid(), getsid(child));
+	// }
+	// else
+	// {
+	// 	int parent = getpid();
+	// 	printf("Parent (%d): session %d\n", getpid(), getsid(parent));
+	// }
