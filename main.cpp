@@ -15,8 +15,6 @@ std::vector<std::vector<int>> matrixB;
 std::vector<std::vector<int>> matrixResult1(countCols);
 std::vector<std::vector<int>> matrixResult2(countCols);
 
-std::vector<std::thread> thread_pool(countCols);
-
 void initMatrix()
 {
 	std::srand(time(NULL));
@@ -71,14 +69,28 @@ void printMatrix(const std::vector<std::vector<int>>& matrixToPrint_, const std:
 	std::cout << std::endl;
 }
 
+void multingThread(int indexRow, int countRows)
+{
+	int diff = matrixResult2.size() - indexRow;
+	if (diff < countRows)
+		countRows = diff;
+	for (int i = 0; i < countRows; i++)
+	{
+		multMatrix(matrixA[indexRow + i], matrixResult2, indexRow + i);
+	}
+}
+
 void multInThreads()
 {
-	for (size_t i = 0; i < countRows; ++i)
+	int multSize = sqrt(countRows);
+	int countThreads = countRows / multSize + 1;
+	std::vector<std::thread> thread_pool(countThreads);
+	for (size_t i = 0; i < countThreads; ++i)
 	{
-		thread_pool[i] = (std::thread(multMatrix, matrixA[i], std::ref(matrixResult2), i));
-	}	
+		thread_pool[i] = (std::thread(multingThread, i*multSize, multSize));
+	}
 
-	for (size_t i = 0; i < countRows; ++i)
+	for (size_t i = 0; i < countThreads; ++i)
 	{
 		thread_pool[i].join();
 	}
@@ -88,7 +100,7 @@ void multInThreads()
 int main()
 {
 	initMatrix();
-	
+
 	time_t timeStart = time(NULL);
 	//multWithoutThreads();
 	time_t timeEnd = time(NULL);
