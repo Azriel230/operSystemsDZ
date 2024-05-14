@@ -11,13 +11,13 @@ struct File
 	std::string name;
 	std::string data;
 	int size;
+	std::mutex m_mutex;
 };
 
 class FileSystem
 {
 	std::vector<File*> m_files;
 	int m_countFiles{ 0 };
-	std::mutex m_mutex;
 public:
 	FileSystem();
 	FileSystem(int countFiles);
